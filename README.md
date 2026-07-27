@@ -124,7 +124,7 @@ it on and badges queue off the anchor instead, vertically or horizontally.
 
 </details>
 
-<details>
+<details open>
 <summary><b>Drag to place</b> — a badge can go anywhere, not into a preset slot</summary>
 
 <img src="assets/floating_badge_example_v1.png" width="820" alt="Dragging the Caps Lock badge to an arbitrary spot on the desktop">
@@ -142,7 +142,7 @@ judgment; you can't make it against invisible neighbors.
 
 </details>
 
-<details>
+<details open>
 <summary><b>Color picker</b> — swatches for people, hex for precision</summary>
 
 <img src="assets/click_pick_color.png" width="760" alt="The color swatch grid open over the settings window">
