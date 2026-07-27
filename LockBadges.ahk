@@ -39,18 +39,18 @@ Persistent
 ;     The only foreign-window data used is the foreground window's
 ;     class, style and rectangle, solely to spot fullscreen apps.
 ;   * No file logging of any kind. A debug log that records window
-;     classes or focus changes becomes a behavioural record of the
+;     classes or focus changes becomes a behavioral record of the
 ;     user's session. If you must debug, log booleans.
 ;   * No network access, no telemetry, no update check.
 ;  ------------------------------------------------------------------
 ; =====================================================================
 
 ; Block the AutoHotkey main window (variable/line inspection UI).
-; Defence in depth only - the source is plain text and readable anyway.
+; Defense in depth only - the source is plain text and readable anyway.
 A_AllowMainWindow := false
 
 APP_NAME := "LockBadges"
-APP_VER := "v1.5.1"
+APP_VER := "v1.5.2"
 APP_AUTHOR := "Carl Lochstampfor"
 APP_REPO := "github.com/CLochstampfor60/LockBadges"
 APP_LICENSE := "MIT License"
@@ -95,8 +95,8 @@ CAP_H_ON := 110
 CAP_H_OFF := 74
 
 Backdrops := Map("Light page", "FFFFFF", "Dark editor", "1F1F1F"
-               , "Mid grey", "808080", "Web page grey", "D9D9D9")
-BackdropNames := ["Light page", "Dark editor", "Mid grey", "Web page grey"]
+               , "Mid gray", "808080", "Web page gray", "D9D9D9")
+BackdropNames := ["Light page", "Dark editor", "Mid gray", "Web page gray"]
 
 FontList := ["Segoe UI", "Segoe UI Semibold", "Segoe UI Black", "Bahnschrift"
     , "Arial", "Arial Black", "Calibri", "Cambria", "Candara", "Cascadia Mono"
@@ -114,7 +114,7 @@ Palette := [
 
 ; Sound cue options. "*N" specs are Windows system sounds played through
 ; SoundPlay, which is asynchronous and respects the user's sound scheme and
-; mute state. Synthesised tones (SoundBeep/Beep) are deliberately not used:
+; mute state. Synthesized tones (SoundBeep/Beep) are deliberately not used:
 ; they block the single AHK thread and would stall the fade animation.
 SoundChoices := ["None", "System beep", "Information", "Warning", "Question"
     , "Error", "Custom WAV file..."]
@@ -282,7 +282,7 @@ FontStyleStr(k, colorHex) {
 }
 
 ; Alpha-composite fg over bg: the same maths Windows applies to a layered
-; window, so a blended flat colour is an honest preview.
+; window, so a blended flat color is an honest preview.
 Blend(fgHex, bgHex, alpha) {
     f := Integer("0x" SafeHex(fgHex, "FFFFFF"))
     b := Integer("0x" SafeHex(bgHex, "FFFFFF"))
@@ -385,7 +385,7 @@ PlayCue(spec) {
 
     if (SubStr(spec, 1, 1) = "*") {
         ; MessageBeep directly rather than SoundPlay: it is documented,
-        ; asynchronous, and honours the user's sound scheme. Codes match
+        ; asynchronous, and honors the user's sound scheme. Codes match
         ; MB_ICONHAND 0x10, QUESTION 0x20, EXCLAMATION 0x30, ASTERISK 0x40,
         ; and 0xFFFFFFFF for the plain default beep.
         n := SubStr(spec, 2)
@@ -395,7 +395,7 @@ PlayCue(spec) {
                 return true
         }
         ; Sound scheme set to "No Sounds" swallows MessageBeep, so fall back
-        ; to a short synthesised tone. Blocking, but only on this path.
+        ; to a short synthesized tone. Blocking, but only on this path.
         try {
             DllCall("Beep", "uint", 800, "uint", 90)
             return true
@@ -467,7 +467,7 @@ BuildBadge(k, on) {
     g.MarginX := 0
     g.MarginY := 0
     g.SetFont(FontStyleStr(k, col), SafeFont(Cfg[k]["font"]))
-    ; 0x200 = vertical centre, 0x100 = SS_NOTIFY so drag mode sees clicks
+    ; 0x200 = vertical center, 0x100 = SS_NOTIFY so drag mode sees clicks
     t := g.Add("Text", "w" bw " h" bh " Center 0x200 0x100"
              , on ? Cfg[k]["labelOn"] : Cfg[k]["labelOff"])
     g.Show("x" px " y" py " w" bw " h" bh " NoActivate Hide")
@@ -547,9 +547,9 @@ FadeStep(k) {
     ApplyAlpha(k, St[k]["cur"])
 }
 
-; Two flavours of see-through:
+; Two flavors of see-through:
 ;   normal - the whole box is translucent, text included
-;   ghost  - the background colour is keyed out, leaving only the text
+;   ghost  - the background color is keyed out, leaving only the text
 ApplyAlpha(k, a) {
     global Cfg, St
     if !IsObject(St[k]["gui"])
@@ -563,7 +563,7 @@ ApplyAlpha(k, a) {
     }
 }
 
-; Old configs stored this as 0/1; normalise whatever is on disk.
+; Old configs stored this as 0/1; normalize whatever is on disk.
 AnchorKey() {
     global Gcfg, Keys
     a := Gcfg.Has("anchor") ? Gcfg["anchor"] : "Caps"
@@ -713,7 +713,7 @@ EnterDrag(k) {
     DragMode := true
     DragKey := k
     ; Other badges stay up as click-through reference points, so you can line
-    ; one up against its neighbours instead of guessing.
+    ; one up against its neighbors instead of guessing.
     if (Gcfg["previewAll"]) {
         for other in Keys {
             if (other != k && Cfg[other]["enabled"])
@@ -1009,7 +1009,7 @@ ShowSettings() {
     Ctl["previewAll"].OnEvent("Click", Touch)
     SG.Add("Text", "x" PVX " y346 w310 cGray"
         , "Drag the blue handle, or anywhere on the ON badge, to resize."
-        . "`nColours shown are the true blended result at this opacity."
+        . "`nColors shown are the true blended result at this opacity."
         . "`nThe real badge on your desktop also updates as you type.")
 
     PreviewMode := true
@@ -1092,7 +1092,7 @@ AddKeyControls(k) {
     c["duration"] := SG.Add("Edit", "x" cx " y" y " w70", Cfg[k]["duration"])
     y += step
 
-    SG.Add("Text", "x" lx " y" (y + 4) " w100", "Behaviour")
+    SG.Add("Text", "x" lx " y" (y + 4) " w100", "Behavior")
     c["mode"] := SG.Add("DropDownList", "x" cx " y" y " w170 Choose"
         . (Cfg[k]["mode"] = "persistent" ? 2 : 1)
         , ["Flash briefly on change", "Stay visible until toggled off"])
@@ -1192,7 +1192,7 @@ ApplyLive() {
 
 ; While Settings is open, show the badge for the tab you are editing - and,
 ; unless asked not to, every other enabled badge alongside it. Placement is
-; a relative judgement; you cannot make it against invisible neighbours.
+; a relative judgment; you cannot make it against invisible neighbors.
 ShowLive() {
     global Cfg, Gcfg, St, Keys
     k := ActiveKey()
@@ -1316,7 +1316,7 @@ ApplyFromSettings() {
             if (idx != 7)                       ; 7 keeps the chosen file path
                 Cfg[k][fld] := SpecFromSoundIndex(idx)
             else if (SubStr(Cfg[k][fld], 1, 1) = "*")
-                Cfg[k][fld] := ""               ; picker was cancelled
+                Cfg[k][fld] := ""               ; picker was canceled
         }
         Cfg[k]["mode"] := (c["mode"].Value = 2) ? "persistent" : "flash"
         Cfg[k]["bg"] := SafeHex(Cfg[k]["bg"], "1B1B1B")
@@ -1442,12 +1442,12 @@ CloseSettings(force := false) {
 }
 
 ; =====================================================================
-;  COLOUR PICKER
+;  COLOR PICKER
 ;  A swatch grid for people, plus the real Windows dialog for precision.
 ; =====================================================================
 PickColor(key, field, *) {
     global Palette
-    p := Gui("+AlwaysOnTop +ToolWindow", "Choose a colour")
+    p := Gui("+AlwaysOnTop +ToolWindow", "Choose a color")
     p.SetFont("s9", "Segoe UI")
 
     cell := 22
@@ -1467,7 +1467,7 @@ PickColor(key, field, *) {
     }
     gridBottom := 12 + row * (cell + gap) + 6
 
-    more := p.Add("Button", "x12 y" gridBottom " w120 h26", "More colours...")
+    more := p.Add("Button", "x12 y" gridBottom " w120 h26", "More colors...")
     more.OnEvent("Click", MoreColors.Bind(key, field, p))
     cancel := p.Add("Button", "x+8 yp w80 h26", "Cancel")
     cancel.OnEvent("Click", (*) => p.Destroy())
@@ -1494,14 +1494,14 @@ MoreColors(key, field, p, *) {
     }
 }
 
-; Windows COLORREF is 0x00BBGGRR; hex colours are RRGGBB. Same swap both ways.
+; Windows COLORREF is 0x00BBGGRR; hex colors are RRGGBB. Same swap both ways.
 SwapRB(v) {
     return ((v & 0xFF) << 16) | (v & 0xFF00) | ((v >> 16) & 0xFF)
 }
 
-; The native CHOOSECOLOR dialog. Returns a COLORREF, or "" if cancelled.
+; The native CHOOSECOLOR dialog. Returns a COLORREF, or "" if canceled.
 ChooseColorDlg(ownerHwnd, initBgr) {
-    static custom := Buffer(64, 0)          ; 16 custom-colour slots, persists
+    static custom := Buffer(64, 0)          ; 16 custom-color slots, persists
     size := (A_PtrSize = 8) ? 72 : 36
     rgbOff := (A_PtrSize = 8) ? 24 : 12
     cc := Buffer(size, 0)

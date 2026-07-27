@@ -3,6 +3,13 @@
 All notable changes to this project are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.5.2] - 2026-07-27
+
+### Changed
+- Spelling corrected to American English throughout the source, UI strings and
+  documentation. Two preview backdrop names changed ("Mid gray", "Web page
+  gray"); an existing config holding the old names falls back to "Light page".
+
 ## [1.5.0] - 2026-07-27
 
 ### Added
@@ -14,8 +21,8 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
   exactly when it matters most, in games.
 
 ### Notes
-- System sounds are played via `SoundPlay`, which is asynchronous and honours
-  the user's Windows sound scheme and mute state. Synthesised tones
+- System sounds are played via `SoundPlay`, which is asynchronous and honors
+  the user's Windows sound scheme and mute state. Synthesized tones
   (`SoundBeep`/`Beep`) are deliberately not used: they block the single
   AutoHotkey thread and would stall the fade animation.
 - Cues are rate-limited to one per 120ms so two locks toggling together do not
@@ -41,8 +48,8 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 - All enabled badges now stay visible while Settings is open, and while dragging
-  one into place. Placement is a relative judgement and can't be made against
-  invisible neighbours.
+  one into place. Placement is a relative judgment and can't be made against
+  invisible neighbors.
 
 ### Fixed
 - Stack layout no longer re-anchors mid-drag, which previously yanked the badge
@@ -89,14 +96,15 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 ### Added
 - Independent badges for Caps Lock, Num Lock and Scroll Lock, in a tabbed
   settings window
-- Live preview with true alpha-composited colours over a selectable backdrop
+- Live preview with true alpha-composited colors over a selectable backdrop
 - Drag-to-place, drag-to-resize, and four size presets
-- 40-swatch colour palette plus the native Windows colour picker
+- 40-swatch color palette plus the native Windows color picker
 - Font selection with bold/italic
 - Flash-on-change or stay-visible-until-toggled-off, per lock
 - Optional vertical or horizontal stacking
 - Autostart toggle and INI persistence
 
+[1.5.2]: ../../releases/tag/v1.5.2
 [1.5.0]: ../../releases/tag/v1.5.0
 [1.4.0]: ../../releases/tag/v1.4.0
 [1.3.0]: ../../releases/tag/v1.3.0

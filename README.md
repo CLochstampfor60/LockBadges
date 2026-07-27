@@ -16,7 +16,7 @@
 
 My keyboard has no caps lock light. The existing utilities I tried each got something wrong:
 
-- The popup was a large banner locked to the **top centre** of the screen, directly over what I was typing.
+- The popup was a large banner locked to the **top center** of the screen, directly over what I was typing.
 - Others used a **tray icon**, which is useless when you already have fifteen tray icons and can't spot a small change among them.
 - Logitech's Options+ notification looked good but was **fixed to the middle of the display** and **fully opaque**, so it covered content briefly every time it appeared.
 
@@ -28,7 +28,7 @@ I looked for existing tools before writing this. Credit where it's due:
 
 | Project | License | Approach |
 |---|---|---|
-| [CapsLockIndicator](https://github.com/jonaskohl/CapsLockIndicator) | Apache-2.0 | The most mature option by a wide margin. Overlay on state change with configurable display time, opacity, font, border thickness, and separate activated/deactivated colours for background, text and border. Optional persistent overlay per lock. Position is chosen from a nine-cell grid. |
+| [CapsLockIndicator](https://github.com/jonaskohl/CapsLockIndicator) | Apache-2.0 | The most mature option by a wide margin. Overlay on state change with configurable display time, opacity, font, border thickness, and separate activated/deactivated colors for background, text and border. Optional persistent overlay per lock. Position is chosen from a nine-cell grid. |
 | [LogiLockLED](https://github.com/infra223/LogiLockLED) | Open source | Tray icons plus on-screen popups, and — its real differentiator — physical key backlight control through Logitech G Hub or OpenRGB. |
 | [KeyzPal](https://github.com/limbo666/KeyzPal) | Open source | Tray icon indicators with four icon themes. No on-screen display. |
 
@@ -36,11 +36,11 @@ Closed-source freeware in the same category: TrayStatus, Keyboard LEDs, Keyboard
 
 **Why this one exists anyway.** The overlap with CapsLockIndicator is real — it also has opacity and a font picker, so "translucent overlay" alone isn't the gap. What LockBadges does differently:
 
-- **Free pixel placement.** Nine grid cells cover corners, edges and centre. They cannot put a badge in a specific empty spot on the taskbar, which is where I wanted mine. Drag it anywhere, or type exact coordinates.
-- **Per-lock independence.** Each lock has its own colours, font, size, position, opacity, duration and behaviour mode — not one shared appearance applied to all three.
+- **Free pixel placement.** Nine grid cells cover corners, edges and center. They cannot put a badge in a specific empty spot on the taskbar, which is where I wanted mine. Drag it anywhere, or type exact coordinates.
+- **Per-lock independence.** Each lock has its own colors, font, size, position, opacity, duration and behavior mode — not one shared appearance applied to all three.
 - **No-box mode.** The background can be keyed out entirely, leaving only floating text, so nothing is ever hidden.
 - **Environment awareness.** Auto-hide during fullscreen apps, follow the focused monitor, exclude from screen capture.
-- **Composited preview.** Colours are previewed as the true blended result at your opacity over a chosen backdrop, because opacity that works over a white page often fails over a dark IDE.
+- **Composited preview.** Colors are previewed as the true blended result at your opacity over a chosen backdrop, because opacity that works over a white page often fails over a dark IDE.
 
 **Where CapsLockIndicator is still ahead:** borders, localisation, years of bug fixes across many machines, and a packaged installer. If you want a solid indicator and don't care exactly where it sits, use it — it's good software. This project exists because I cared exactly where it sits.
 
@@ -50,14 +50,14 @@ Closed-source freeware in the same category: TrayStatus, Keyboard LEDs, Keyboard
 - Drag the badge anywhere on screen, or type exact X/Y coordinates
 - Drag-to-resize with a handle, or four one-click size presets
 - Per-badge font (any installed font), size, bold/italic
-- Colour palette with 40 swatches plus the native Windows colour picker, or raw hex
+- Color palette with 40 swatches plus the native Windows color picker, or raw hex
 - Opacity slider, with an optional **"no box" mode** that removes the background entirely and floats only the text
 
-**Behaviour**
+**Behavior**
 - **Flash briefly on change** or **stay visible until toggled off**, per lock
-- Configurable flash duration and separate text/colour for the ON and OFF states
+- Configurable flash duration and separate text/color for the ON and OFF states
 - Optional sound cues per lock, separately for ON and OFF — a Windows system
-  sound or your own WAV. Plays asynchronously and honours your sound scheme and
+  sound or your own WAV. Plays asynchronously and honors your sound scheme and
   mute state, so silencing Windows silences this too.
 - Optional stacking (vertical or horizontal) from a configurable anchor badge, for when two locks are lit at once
 - Click-through at all times — the badge can never intercept a click
@@ -69,7 +69,7 @@ Closed-source freeware in the same category: TrayStatus, Keyboard LEDs, Keyboard
 - Optional exclusion from screen capture, so it stays out of recordings and Teams/Zoom shares
 
 **Live preview**
-- The settings window previews colours as the **true alpha-composited result** at your chosen opacity, over a selectable backdrop (light page, dark editor, mid grey)
+- The settings window previews colors as the **true alpha-composited result** at your chosen opacity, over a selectable backdrop (light page, dark editor, mid gray)
 - Every enabled badge stays on your desktop while settings are open, so you can position one against the others
 
 ## Screenshots
@@ -79,7 +79,7 @@ Closed-source freeware in the same category: TrayStatus, Keyboard LEDs, Keyboard
 
 <img src="assets/caps_tab_image1.png" width="820" alt="Caps Lock tab">
 
-Text, font, size, position, three colours, opacity, flash duration, behaviour
+Text, font, size, position, three colors, opacity, flash duration, behavior
 mode and sound cues — all specific to this one lock. The preview panel on the
 right shows the ON and OFF states as the true blended result at the chosen
 opacity, over a selectable backdrop.
@@ -108,7 +108,7 @@ for Scroll Lock** to bring it in.
 </details>
 
 <details>
-<summary><b>General tab</b> — stacking, monitor behaviour, capture, autostart</summary>
+<summary><b>General tab</b> — stacking, monitor behavior, capture, autostart</summary>
 
 <img src="assets/general_tab_image1.png" width="820" alt="General tab">
 
@@ -118,9 +118,40 @@ it on and badges queue off the anchor instead, vertically or horizontally.
 </details>
 
 <details>
-<summary><b>About tab</b> — version, licence, and the privacy summary</summary>
+<summary><b>About tab</b> — version, license, and the privacy summary</summary>
 
 <img src="assets/about_tab_image1.png" width="820" alt="About tab">
+
+</details>
+
+<details>
+<summary><b>Drag to place</b> — a badge can go anywhere, not into a preset slot</summary>
+
+<img src="assets/floating_badge_example_v1.png" width="820" alt="Dragging the Caps Lock badge to an arbitrary spot on the desktop">
+
+Click **Drag to place**, move the badge anywhere on screen with the mouse, then
+**Done placing** to capture the coordinates and **Save** to keep them. Here the
+Caps Lock badge has been pulled out to the right edge of the display while Num
+and Scroll stay parked on the taskbar.
+
+Two things are happening at once in that shot. The badge being placed is free to
+land on any pixel — there is no grid of preset positions to choose from. And the
+other enabled badges remain visible the whole time, click-through, so you can
+line one up against its neighbors instead of guessing. Placement is a relative
+judgment; you can't make it against invisible neighbors.
+
+</details>
+
+<details>
+<summary><b>Color picker</b> — swatches for people, hex for precision</summary>
+
+<img src="assets/click_pick_color.png" width="760" alt="The color swatch grid open over the settings window">
+
+**Pick** next to any of the three color fields opens a 40-swatch grid. **More
+colors...** hands off to the native Windows color dialog for anything not in the
+grid. Clicking a swatch writes its hex value into the field, so you can also
+find out what a color you liked is actually called — and type hex directly if
+you already know it.
 
 </details>
 
@@ -171,13 +202,13 @@ screenshots won't show the app either.
 
 | Tab | What it controls |
 |---|---|
-| **Caps Lock** / **Num Lock** / **Scroll Lock** | Everything about that one badge: enable, ON/OFF text, font, size, position, colours, opacity, flash duration, behaviour mode |
+| **Caps Lock** / **Num Lock** / **Scroll Lock** | Everything about that one badge: enable, ON/OFF text, font, size, position, colors, opacity, flash duration, behavior mode |
 | **General** | Preview backdrop, stacking mode and anchor, gap, monitor follow, fullscreen hiding, screen-capture exclusion, autostart |
-| **About** | Version, author, licence, privacy summary, config folder shortcut |
+| **About** | Version, author, license, privacy summary, config folder shortcut |
 
 **Buttons that aren't self-explanatory:**
 
-- **Drag to place** — the badge becomes draggable on the desktop. Move it, then click **Done placing** to capture the position.
+- **Drag to place** — the badge becomes draggable on the desktop. Move it, then click **Done placing** to capture the position. ([screenshot](#screenshots))
 - **Test this badge** / **Test all badges** — plays the real fade-in/fade-out so you can judge timing.
 - **Save** leaves the window open so you can keep tuning. **Close** prompts if you have unsaved changes.
 
@@ -185,7 +216,7 @@ screenshots won't show the app either.
 
 - For peripheral vision, a heavy font at a smaller size (Arial Black, Segoe UI Black) reads better than a large thin one.
 - Opacity behaves very differently over a white document than over a dark IDE. Use the **Shown over** dropdown to check both before committing.
-- If you place badges by hand, set stacking to **Off** — stacking deliberately ignores each badge's saved position in favour of the anchor.
+- If you place badges by hand, set stacking to **Off** — stacking deliberately ignores each badge's saved position in favor of the anchor.
 
 ## Configuration file
 
@@ -233,7 +264,7 @@ Access denied is the pass. Checking the ACL tells you what Windows intends; atte
 
 If you compile this to an `.exe` with Ahk2Exe, expect antivirus and SmartScreen warnings. This is normal for AutoHotkey binaries and worth understanding rather than working around:
 
-- A compiled AHK executable bundles the interpreter alongside your script, which resembles the packing behaviour heuristics associate with malware.
+- A compiled AHK executable bundles the interpreter alongside your script, which resembles the packing behavior heuristics associate with malware.
 - Automation tooling that reads keyboard state is, structurally, similar to a keylogger. Heuristics can't tell intent apart from implementation.
 - An unsigned binary with no download history has no SmartScreen reputation.
 
@@ -249,7 +280,7 @@ If you compile this to an `.exe` with Ahk2Exe, expect antivirus and SmartScreen 
 
 **Polling, not hooking.** A 100ms timer reading a toggle bit is simpler, cheaper and safer than a keyboard hook, and it's the reason the privacy claim above holds.
 
-**Preview honesty.** A child control can't be genuinely translucent, so the preview alpha-composites the badge colours against the selected backdrop using the same maths Windows applies to a layered window. The colours shown are the real result, not an approximation.
+**Preview honesty.** A child control can't be genuinely translucent, so the preview alpha-composites the badge colors against the selected backdrop using the same maths Windows applies to a layered window. The colors shown are the real result, not an approximation.
 
 ## Troubleshooting
 
@@ -279,7 +310,7 @@ No registry keys, no services, no other files.
 ## Roadmap
 
 - Config export/import
-- Idle auto-normalise (turn caps off after N seconds untouched)
+- Idle auto-normalize (turn caps off after N seconds untouched)
 
 ## Contributing
 
