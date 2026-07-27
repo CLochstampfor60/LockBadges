@@ -3,6 +3,24 @@
 All notable changes to this project are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.5.0] - 2026-07-27
+
+### Added
+- Optional sound cues, configurable per lock and separately for the ON and OFF
+  transition. Choose a Windows system sound or supply a custom WAV, with a
+  **Play** button to audition it.
+- **Still play sound cues while hidden** (General tab, on by default) — badges
+  are suppressed during full-screen apps, so audio becomes the only channel
+  exactly when it matters most, in games.
+
+### Notes
+- System sounds are played via `SoundPlay`, which is asynchronous and honours
+  the user's Windows sound scheme and mute state. Synthesised tones
+  (`SoundBeep`/`Beep`) are deliberately not used: they block the single
+  AutoHotkey thread and would stall the fade animation.
+- Cues are rate-limited to one per 120ms so two locks toggling together do not
+  talk over each other.
+
 ## [1.4.0] - 2026-07-27
 
 ### Added
@@ -79,6 +97,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 - Optional vertical or horizontal stacking
 - Autostart toggle and INI persistence
 
+[1.5.0]: ../../releases/tag/v1.5.0
 [1.4.0]: ../../releases/tag/v1.4.0
 [1.3.0]: ../../releases/tag/v1.3.0
 [1.2.1]: ../../releases/tag/v1.2.1

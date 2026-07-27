@@ -21,6 +21,28 @@ My keyboard has no caps lock light. The existing utilities I tried each got some
 
 The requirement was narrow and none of them met it: something visible in **peripheral vision**, positioned where *I* choose, **see-through** so it never hides what's underneath, and configurable without editing a file.
 
+## Alternatives and prior art
+
+I looked for existing tools before writing this. Credit where it's due:
+
+| Project | License | Approach |
+|---|---|---|
+| [CapsLockIndicator](https://github.com/jonaskohl/CapsLockIndicator) | Apache-2.0 | The most mature option by a wide margin. Overlay on state change with configurable display time, opacity, font, border thickness, and separate activated/deactivated colours for background, text and border. Optional persistent overlay per lock. Position is chosen from a nine-cell grid. |
+| [LogiLockLED](https://github.com/infra223/LogiLockLED) | Open source | Tray icons plus on-screen popups, and — its real differentiator — physical key backlight control through Logitech G Hub or OpenRGB. |
+| [KeyzPal](https://github.com/limbo666/KeyzPal) | Open source | Tray icon indicators with four icon themes. No on-screen display. |
+
+Closed-source freeware in the same category: TrayStatus, Keyboard LEDs, Keyboard Notifier, addLEDs, 7Caps.
+
+**Why this one exists anyway.** The overlap with CapsLockIndicator is real — it also has opacity and a font picker, so "translucent overlay" alone isn't the gap. What LockBadges does differently:
+
+- **Free pixel placement.** Nine grid cells cover corners, edges and centre. They cannot put a badge in a specific empty spot on the taskbar, which is where I wanted mine. Drag it anywhere, or type exact coordinates.
+- **Per-lock independence.** Each lock has its own colours, font, size, position, opacity, duration and behaviour mode — not one shared appearance applied to all three.
+- **No-box mode.** The background can be keyed out entirely, leaving only floating text, so nothing is ever hidden.
+- **Environment awareness.** Auto-hide during fullscreen apps, follow the focused monitor, exclude from screen capture.
+- **Composited preview.** Colours are previewed as the true blended result at your opacity over a chosen backdrop, because opacity that works over a white page often fails over a dark IDE.
+
+**Where CapsLockIndicator is still ahead:** borders, localisation, years of bug fixes across many machines, and a packaged installer. If you want a solid indicator and don't care exactly where it sits, use it — it's good software. This project exists because I cared exactly where it sits.
+
 ## Features
 
 **Placement and appearance**
@@ -33,11 +55,15 @@ The requirement was narrow and none of them met it: something visible in **perip
 **Behaviour**
 - **Flash briefly on change** or **stay visible until toggled off**, per lock
 - Configurable flash duration and separate text/colour for the ON and OFF states
+- Optional sound cues per lock, separately for ON and OFF — a Windows system
+  sound or your own WAV. Plays asynchronously and honours your sound scheme and
+  mute state, so silencing Windows silences this too.
 - Optional stacking (vertical or horizontal) from a configurable anchor badge, for when two locks are lit at once
 - Click-through at all times — the badge can never intercept a click
 
 **Environment awareness**
 - Hides automatically while a fullscreen app is active (games, video, slideshows), while still tracking state so nothing flashes at you on the way out
+- Sound cues keep playing while badges are hidden, so a lock change is still noticeable in a full-screen game
 - Optional "follow the monitor holding the focused window" for multi-monitor setups
 - Optional exclusion from screen capture, so it stays out of recordings and Teams/Zoom shares
 
@@ -172,7 +198,6 @@ No registry keys, no services, no other files.
 
 ## Roadmap
 
-- Sound cue option
 - Config export/import
 - Idle auto-normalise (turn caps off after N seconds untouched)
 
