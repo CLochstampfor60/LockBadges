@@ -6,8 +6,9 @@
 ![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D6)
 ![AutoHotkey v2](https://img.shields.io/badge/AutoHotkey-v2.0%2B-334455)
 
-<!-- Replace with a real screenshot before publishing. -->
-![LockBadges settings window](docs/screenshots/settings-caps.png)
+<img src="assets/caps_tab_image1.png" width="820" alt="LockBadges settings window with three badges placed on the taskbar">
+
+<sub>Three badges parked on an empty stretch of taskbar, left of the search box — visible in peripheral vision, out of the way of everything else. Placement like that is the reason this exists.</sub>
 
 ---
 
@@ -71,6 +72,82 @@ Closed-source freeware in the same category: TrayStatus, Keyboard LEDs, Keyboard
 - The settings window previews colours as the **true alpha-composited result** at your chosen opacity, over a selectable backdrop (light page, dark editor, mid grey)
 - Every enabled badge stays on your desktop while settings are open, so you can position one against the others
 
+## Screenshots
+
+<details open>
+<summary><b>Caps Lock tab</b> — every lock gets its own full control set</summary>
+
+<img src="assets/caps_tab_image1.png" width="820" alt="Caps Lock tab">
+
+Text, font, size, position, three colours, opacity, flash duration, behaviour
+mode and sound cues — all specific to this one lock. The preview panel on the
+right shows the ON and OFF states as the true blended result at the chosen
+opacity, over a selectable backdrop.
+
+</details>
+
+<details>
+<summary><b>Num Lock tab</b> — same controls, independent values</summary>
+
+<img src="assets/num_tab_image1.png" width="820" alt="Num Lock tab">
+
+Nothing is shared between locks. Num Lock here uses a green accent
+(`4BD4A0`) and its own coordinates, so it sits beside Caps rather than on
+top of it.
+
+</details>
+
+<details>
+<summary><b>Scroll Lock tab</b> — disabled by default, enable if you want it</summary>
+
+<img src="assets/scroll_tab_image1.png" width="820" alt="Scroll Lock tab">
+
+Scroll Lock ships disabled since few people use the key. Tick **Show a badge
+for Scroll Lock** to bring it in.
+
+</details>
+
+<details>
+<summary><b>General tab</b> — stacking, monitor behaviour, capture, autostart</summary>
+
+<img src="assets/general_tab_image1.png" width="820" alt="General tab">
+
+Stacking is off here, so each badge keeps the position you saved for it. Turn
+it on and badges queue off the anchor instead, vertically or horizontally.
+
+</details>
+
+<details>
+<summary><b>About tab</b> — version, licence, and the privacy summary</summary>
+
+<img src="assets/about_tab_image1.png" width="820" alt="About tab">
+
+</details>
+
+### Capture exclusion, demonstrated
+
+Both screenshots were taken with all three badges lit on the taskbar. The only
+difference that matters is the **Exclude badges from screen capture** checkbox —
+off on the left, on on the right. In the right-hand image the badges are simply
+not in the capture. The screenshot is the proof, not a description of it.
+
+(The two shots aren't otherwise identical — the preview panel happens to be on a
+different tab in each — but the taskbar strip at the bottom is the point.)
+
+<table>
+<tr>
+<td width="50%"><img src="assets/general_tab_image1.png" alt="Capture exclusion off - badges appear on the taskbar"></td>
+<td width="50%"><img src="assets/general_tab_exclude-screenshots_image2.png" alt="Capture exclusion on - badges absent from the taskbar"></td>
+</tr>
+<tr>
+<td align="center"><sub><b>Off</b> — badges captured normally</sub></td>
+<td align="center"><sub><b>On</b> — badges absent from the capture</sub></td>
+</tr>
+</table>
+
+This is why the option defaults to off: leave it on and your own documentation
+screenshots won't show the app either.
+
 ## Requirements
 
 - Windows 10 or 11
@@ -81,7 +158,10 @@ Closed-source freeware in the same category: TrayStatus, Keyboard LEDs, Keyboard
 1. Install AutoHotkey v2 from [autohotkey.com](https://www.autohotkey.com/).
 2. Download `LockBadges.ahk` from [Releases](../../releases) or clone this repo.
 3. Put it somewhere permanent. **`C:\Program Files\LockBadges\` is recommended** — see [Security](#security-and-privacy) for why the location matters.
-4. Double-click it. A green **H** appears in your tray.
+4. Double-click it. A green **H** appears in your tray — that's the AutoHotkey interpreter running the script.
+
+   <img src="assets/icon_tray_location.png" width="290" alt="Green H tray icon">
+
 5. Left-click the tray icon (or press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>) to open Settings.
 6. On the **General** tab, tick **Start automatically with Windows**, then **Save**.
 
@@ -185,7 +265,7 @@ If you compile this to an `.exe` with Ahk2Exe, expect antivirus and SmartScreen 
 
 **Reset pos moves it off my taskbar** — expected. It uses the monitor *work area*, which excludes the taskbar. Use Drag to place instead.
 
-**Badge missing from my screenshots** — "Exclude badges from screen capture" is on. Turn it off while documenting.
+**Badge missing from my screenshots** — "Exclude badges from screen capture" is on. Turn it off while documenting. See [Capture exclusion, demonstrated](#capture-exclusion-demonstrated).
 
 ## Uninstall
 
