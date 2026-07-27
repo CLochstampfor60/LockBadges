@@ -50,7 +50,7 @@ Persistent
 A_AllowMainWindow := false
 
 APP_NAME := "LockBadges"
-APP_VER := "v1.4.0"
+APP_VER := "v1.5.1"
 APP_AUTHOR := "Carl Lochstampfor"
 APP_REPO := "github.com/CLochstampfor60/LockBadges"
 APP_LICENSE := "MIT License"
@@ -82,6 +82,7 @@ Dirty := false
 LastKeyTab := "Caps"
 RszX := 0, RszY := 0, RszW := 96, RszH := 30
 PollTick := 0
+LastCueTick := 0
 Suppressed := false
 FollowMon := 0
 
@@ -110,6 +111,14 @@ Palette := [
     ["FFF6E0","FFE599","FFD966","FFC24B","E8A33D","D2691E","FF8A5B","E03131","B02A2A","7A1F1F"],
     ["EAF7EE","C6EFCE","9BE29B","4BD4A0","2FA36B","19692C","E6F2FF","8CC8FF","3B9EFF","1552B0"],
     ["F6EEFF","D9B8FF","B07CFF","8B44FF","5B21B6","FFE1EF","FF9CC8","F062A6","C2185B","7A0F3D"]]
+
+; Sound cue options. "*N" specs are Windows system sounds played through
+; SoundPlay, which is asynchronous and respects the user's sound scheme and
+; mute state. Synthesised tones (SoundBeep/Beep) are deliberately not used:
+; they block the single AHK thread and would stall the fade animation.
+SoundChoices := ["None", "System beep", "Information", "Warning", "Question"
+    , "Error", "Custom WAV file..."]
+SoundSpecs := ["", "*-1", "*64", "*48", "*32", "*16"]
 
 Presets := Map(
     "Small",  [72, 24, 9],
@@ -165,6 +174,8 @@ DefaultsFor(k) {
         "h",         30,
         "fontSize",  11,
         "scaleFont", 1,
+        "soundOn",   "",          ; "" = silent, "*N" = system sound, or a path
+        "soundOff",  "",
         "bg",        "1B1B1B",
         "fgOn",      "FFC24B",
         "fgOff",     "8A8A8A",
@@ -198,7 +209,8 @@ LoadCfg() {
     Gcfg := Map()
     for kk, vv in Map("backdrop", "Light page", "stack", "Off", "gap", 8
                     , "follow", 0, "hideFullscreen", 1, "noCapture", 0
-                    , "previewAll", 1, "anchor", "Caps")
+                    , "previewAll", 1, "anchor", "Caps"
+                    , "soundInFullscreen", 1)
         Gcfg[kk] := IniRead(IniFile, "General", kk, vv)
 }
 
@@ -355,6 +367,82 @@ IsFullscreenActive() {
             return true
     }
     return false
+}
+
+; =====================================================================
+;  SOUND CUES
+; =====================================================================
+; Returns true if something was actually played, so callers can tell the
+; difference between "silent by choice" and "silently broken".
+PlayCue(spec) {
+    global LastCueTick
+    if (spec = "")
+        return false
+    ; Two locks toggling together would otherwise talk over each other.
+    if (A_TickCount - LastCueTick < 120)
+        return true
+    LastCueTick := A_TickCount
+
+    if (SubStr(spec, 1, 1) = "*") {
+        ; MessageBeep directly rather than SoundPlay: it is documented,
+        ; asynchronous, and honours the user's sound scheme. Codes match
+        ; MB_ICONHAND 0x10, QUESTION 0x20, EXCLAMATION 0x30, ASTERISK 0x40,
+        ; and 0xFFFFFFFF for the plain default beep.
+        n := SubStr(spec, 2)
+        code := (n = "-1") ? 0xFFFFFFFF : SafeNum(n, 0, 255, 0x40)
+        try {
+            if (DllCall("user32\MessageBeep", "uint", code))
+                return true
+        }
+        ; Sound scheme set to "No Sounds" swallows MessageBeep, so fall back
+        ; to a short synthesised tone. Blocking, but only on this path.
+        try {
+            DllCall("Beep", "uint", 800, "uint", 90)
+            return true
+        }
+        return false
+    }
+
+    if !FileExist(spec)
+        return false
+    try {
+        SoundPlay(spec)
+        return true
+    }
+    return false
+}
+
+; The Play button must never look broken: report why nothing was heard.
+AuditionCue(spec) {
+    global LastCueTick
+    LastCueTick := 0                      ; bypass the rate limit for auditions
+    if (spec = "") {
+        ToolTip("No sound selected for this state. Pick one from the list.")
+        SetTimer(() => ToolTip(), -2500)
+        return
+    }
+    if (!PlayCue(spec)) {
+        ToolTip("Could not play it. If this is a system sound, check"
+              . "`nSettings > System > Sound > More sound settings > Sounds,"
+              . "`nand that the scheme is not set to No Sounds.")
+        SetTimer(() => ToolTip(), -5000)
+    }
+}
+
+SoundIndexFromSpec(spec) {
+    global SoundSpecs
+    if (spec = "")
+        return 1
+    for i, v in SoundSpecs {
+        if (v != "" && v = spec)
+            return i
+    }
+    return 7                          ; a file path
+}
+
+SpecFromSoundIndex(idx) {
+    global SoundSpecs
+    return (idx >= 1 && idx <= 6) ? SoundSpecs[idx] : ""
 }
 
 ; =====================================================================
@@ -558,9 +646,17 @@ Poll() {
         }
     }
     if (Suppressed) {
-        ; keep tracking state so nothing flashes on the way out
-        for k in Keys
-            St[k]["last"] := GetKeyState(KeyVK[k], "T") ? 1 : 0
+        ; Keep tracking state so nothing flashes on the way out. Sound is the
+        ; only channel left while badges are hidden, which is precisely when
+        ; it matters most - full-screen games.
+        for k in Keys {
+            on := GetKeyState(KeyVK[k], "T") ? 1 : 0
+            if (on = St[k]["last"])
+                continue
+            St[k]["last"] := on
+            if (Gcfg["soundInFullscreen"] && Cfg[k]["enabled"])
+                PlayCue(on ? Cfg[k]["soundOn"] : Cfg[k]["soundOff"])
+        }
         return
     }
 
@@ -590,6 +686,7 @@ Poll() {
         if (on = St[k]["last"])
             continue
         St[k]["last"] := on
+        PlayCue(on ? Cfg[k]["soundOn"] : Cfg[k]["soundOff"])
 
         if (!on && (Cfg[k]["mode"] = "persistent" || !Cfg[k]["notifyOff"])) {
             if St[k]["shown"]
@@ -768,7 +865,7 @@ ShowSettings() {
     ; and silently shifts every page's content up behind it, clipping the
     ; first control. With -Wrap an overflow shows scroll arrows instead and
     ; the page geometry stays put.
-    Ctl["tab"] := SG.Add("Tab3", "x10 y10 w340 h600 -Wrap"
+    Ctl["tab"] := SG.Add("Tab3", "x10 y10 w340 h646 -Wrap"
         , ["Caps Lock", "Num Lock", "Scroll Lock", "General", "About"])
     Ctl["tab"].OnEvent("Change", TabChanged)
 
@@ -822,6 +919,13 @@ ShowSettings() {
         , "Keeps the overlay out of games, video and slideshows. State is "
         . "still tracked, so nothing flashes at you on the way out.")
 
+    Ctl["soundInFullscreen"] := SG.Add("Checkbox", "x42 y+8 w282 Checked"
+        . Gcfg["soundInFullscreen"], "Still play sound cues while hidden")
+    Ctl["soundInFullscreen"].OnEvent("Click", Touch)
+    SG.Add("Text", "x60 y+4 w264 cGray"
+        , "Recommended: in a full-screen game the badge is hidden, so audio "
+        . "is the only way to know a lock changed.")
+
     Ctl["noCapture"] := SG.Add("Checkbox", "x24 y+14 w300 Checked"
         . Gcfg["noCapture"], "Exclude badges from screen capture")
     Ctl["noCapture"].OnEvent("Click", Touch)
@@ -869,15 +973,15 @@ ShowSettings() {
     Ctl["tab"].UseTab(0)
 
     ; ---------------- bottom buttons, outside the tabs ----------------
-    b4 := SG.Add("Button", "x10 y620 w110 h26", "Test this badge")
+    b4 := SG.Add("Button", "x10 y666 w110 h26", "Test this badge")
     b4.OnEvent("Click", (*) => TestFlash())
-    b5 := SG.Add("Button", "x126 y620 w110 h26 Default", "Save")
+    b5 := SG.Add("Button", "x126 y666 w110 h26 Default", "Save")
     b5.OnEvent("Click", (*) => DoSave())
-    b6 := SG.Add("Button", "x242 y620 w108 h26", "Close")
+    b6 := SG.Add("Button", "x242 y666 w108 h26", "Close")
     b6.OnEvent("Click", (*) => CloseSettings())
-    b7 := SG.Add("Button", "x360 y620 w118 h26", "Test all badges")
+    b7 := SG.Add("Button", "x360 y666 w118 h26", "Test all badges")
     b7.OnEvent("Click", (*) => TestAllFlash())
-    Ctl["status"] := SG.Add("Text", "x486 y626 w200 cGray", "")
+    Ctl["status"] := SG.Add("Text", "x486 y672 w200 cGray", "")
 
     ; ---------------- right column: live preview ----------------
     SG.Add("GroupBox", "x360 y10 w330 h400", "Preview")
@@ -915,7 +1019,7 @@ ShowSettings() {
 
 ; One identical control set per lock, built into whichever tab is active.
 AddKeyControls(k) {
-    global SG, Ctl, Cfg, FontList, KeyNice
+    global SG, Ctl, Cfg, FontList, KeyNice, SoundChoices
     Ctl[k] := Map()
     c := Ctl[k]
     lx := 24        ; label x
@@ -994,6 +1098,22 @@ AddKeyControls(k) {
         , ["Flash briefly on change", "Stay visible until toggled off"])
     y += step + 4
 
+    SG.Add("Text", "x" lx " y" (y + 4) " w100", "Sound when ON")
+    c["soundOn"] := SG.Add("DropDownList", "x" cx " y" y " w150 Choose"
+        . SoundIndexFromSpec(Cfg[k]["soundOn"]), SoundChoices)
+    c["soundOn"].OnEvent("Change", PickSound.Bind(k, "soundOn"))
+    pOn := SG.Add("Button", "x282 y" (y - 1) " w48 h23", "Play")
+    pOn.OnEvent("Click", (*) => AuditionCue(Cfg[k]["soundOn"]))
+    y += step
+
+    SG.Add("Text", "x" lx " y" (y + 4) " w100", "Sound when OFF")
+    c["soundOff"] := SG.Add("DropDownList", "x" cx " y" y " w150 Choose"
+        . SoundIndexFromSpec(Cfg[k]["soundOff"]), SoundChoices)
+    c["soundOff"].OnEvent("Change", PickSound.Bind(k, "soundOff"))
+    pOff := SG.Add("Button", "x282 y" (y - 1) " w48 h23", "Play")
+    pOff.OnEvent("Click", (*) => AuditionCue(Cfg[k]["soundOff"]))
+    y += step + 4
+
     c["notifyOff"] := SG.Add("Checkbox", "x" lx " y" y " w300 Checked"
         . Cfg[k]["notifyOff"], "Also pop up when this lock turns OFF")
     y += 22
@@ -1033,6 +1153,21 @@ AddKeyControls(k) {
     for kk in ["enabled", "bold", "italic", "notifyOff", "ghost"
              , "round", "scaleFont"]
         c[kk].OnEvent("Click", Touch)
+}
+
+; Choosing "Custom WAV file..." opens a picker. Cancelling reverts the
+; dropdown rather than silently leaving it on a selection with no file.
+PickSound(k, field, ctrl, *) {
+    global Cfg
+    if (ctrl.Value = 7) {
+        f := FileSelect(3, , "Choose a WAV file for " k " " field
+                      , "Audio (*.wav; *.mp3)")
+        if (f != "")
+            Cfg[k][field] := f
+        else
+            ctrl.Value := SoundIndexFromSpec(Cfg[k][field])
+    }
+    Touch()
 }
 
 Touch(*) {
@@ -1176,6 +1311,13 @@ ApplyFromSettings() {
         Cfg[k]["ghost"] := c["ghost"].Value
         Cfg[k]["round"] := c["round"].Value
         Cfg[k]["scaleFont"] := c["scaleFont"].Value
+        for fld in ["soundOn", "soundOff"] {
+            idx := c[fld].Value
+            if (idx != 7)                       ; 7 keeps the chosen file path
+                Cfg[k][fld] := SpecFromSoundIndex(idx)
+            else if (SubStr(Cfg[k][fld], 1, 1) = "*")
+                Cfg[k][fld] := ""               ; picker was cancelled
+        }
         Cfg[k]["mode"] := (c["mode"].Value = 2) ? "persistent" : "flash"
         Cfg[k]["bg"] := SafeHex(Cfg[k]["bg"], "1B1B1B")
         Cfg[k]["fgOn"] := SafeHex(Cfg[k]["fgOn"], "FFC24B")
@@ -1189,6 +1331,7 @@ ApplyFromSettings() {
         Gcfg["follow"] := Ctl["follow"].Value
         Gcfg["hideFullscreen"] := Ctl["hideFullscreen"].Value
         Gcfg["noCapture"] := Ctl["noCapture"].Value
+        Gcfg["soundInFullscreen"] := Ctl["soundInFullscreen"].Value
         Gcfg["previewAll"] := Ctl["previewAll"].Value
         Gcfg["anchor"] := Keys[SafeNum(Ctl["anchor"].Value, 1, 3, 1)]
     }
