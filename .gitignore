@@ -1,0 +1,70 @@
+# ---------------------------------------------------------------
+# User state - never commit this.
+# config.ini contains your monitor coordinates and local layout.
+# The app writes it to %APPDATA%, but a copy can end up here if you
+# test with a portable build or copy it in to inspect it.
+# ---------------------------------------------------------------
+config.ini
+*.ini
+!docs/**/*.ini
+
+# ---------------------------------------------------------------
+# Build output. This repo ships source; binaries go on Releases,
+# not in git. Compiled AHK executables are also large and binary,
+# which makes them poor citizens in version control.
+# ---------------------------------------------------------------
+*.exe
+*.zip
+*.7z
+*.msi
+*.msix
+build/
+dist/
+out/
+
+# ---------------------------------------------------------------
+# AutoHotkey / editor scratch
+# ---------------------------------------------------------------
+*.ahk.bak
+*.bak
+*.tmp
+*~
+scratch/
+test/
+sandbox/
+
+# ---------------------------------------------------------------
+# Editors and IDEs
+# ---------------------------------------------------------------
+.vscode/
+.idea/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+
+# ---------------------------------------------------------------
+# Windows shell clutter
+# ---------------------------------------------------------------
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ---------------------------------------------------------------
+# macOS / Linux, in case anyone clones on another platform
+# ---------------------------------------------------------------
+.DS_Store
+.AppleDouble
+*.swp
+
+# ---------------------------------------------------------------
+# Logs and crash dumps. This app writes none by design; this is a
+# guard against a debug build accidentally leaving one behind,
+# since a focus/window log would be a record of your session.
+# ---------------------------------------------------------------
+*.log
+*.dmp
+logs/

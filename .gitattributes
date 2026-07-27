@@ -1,0 +1,11 @@
+# AutoHotkey scripts are text; keep CRLF in the working tree on Windows
+# so Notepad and the AHK editor behave, but normalise in the repo.
+*.ahk   text eol=crlf
+*.md    text eol=lf
+*.txt   text eol=lf
+LICENSE text eol=lf
+
+# Screenshots must never be line-ending mangled
+*.png   binary
+*.jpg   binary
+*.gif   binary
