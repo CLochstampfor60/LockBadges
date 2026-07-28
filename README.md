@@ -276,6 +276,12 @@ If you compile this to an `.exe` with Ahk2Exe, expect antivirus and SmartScreen 
 
 **Insert Lock is unsupported for a different reason.** Windows does track an Insert toggle bit, but it's effectively a parity counter of key presses, not a report of application state. Overtype mode is owned per-application — Word tracks its own, VS Code has its own, Notepad and browsers ignore Insert entirely, and nothing resynchronises when you switch windows. The badge would confidently contradict the app you're typing in.
 
+**Fullscreen detection compares against monitor bounds, not the work area.** Windows exposes no API for "is this window fullscreen," so it's inferred from two tests: the window has no title bar, and it covers the monitor's *entire* bounds. The second test is the load-bearing one, because Windows reports two different rectangles per monitor — the **work area**, which excludes the taskbar, and the **monitor bounds**, which include it. A maximized window fills the work area and stops above the taskbar; a fullscreen window covers the full bounds and paints over it. Comparing against bounds is what separates "maximized Chrome" from "game in fullscreen" — compare against the work area instead and the badges would hide on every maximized window.
+
+It also means borderless-windowed mode, which most modern games actually use, is caught with no special handling: borderless is a caption-less popup sized exactly to monitor bounds, so it satisfies both tests identically to exclusive fullscreen.
+
+Worth noting that `ResetPosition` makes the **opposite** choice deliberately, using the work area so a reset never parks a badge behind the taskbar. Two calls, two different rectangles, two different requirements — neither is a bug, and both are commented in the source to say so.
+
 **Click-through by default.** Badge windows carry `WS_EX_TRANSPARENT`, so mouse events pass through to whatever is underneath. An overlay that can steal a click is worse than no overlay. It's temporarily disabled only during "Drag to place".
 
 **Polling, not hooking.** A 100ms timer reading a toggle bit is simpler, cheaper and safer than a keyboard hook, and it's the reason the privacy claim above holds.

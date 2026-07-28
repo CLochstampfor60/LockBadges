@@ -239,6 +239,11 @@ InitState() {
 ; Staggered defaults so two badges never land on top of each other.
 ResetPosition(k, slot) {
     global Cfg
+    ; MonitorGetWorkArea, NOT MonitorGet: the work area excludes the taskbar,
+    ; so a reset never parks a badge underneath it. Note that
+    ; IsFullscreenActive() deliberately makes the opposite choice - see the
+    ; comment there. The two functions want different rectangles, and neither
+    ; call is a mistake.
     MonitorGetWorkArea(MonitorGetPrimary(), &l, &t, &r, &b)
     hh := SafeNum(Cfg[k]["h"], 12, 600, 30)
     Cfg[k]["x"] := r - SafeNum(Cfg[k]["w"], 20, 2000, 96) - 28
@@ -347,22 +352,43 @@ EffectivePos(k, &px, &py) {
 }
 
 ; A borderless window covering an entire monitor: games, video, slideshows.
+; Windows exposes no "is this window fullscreen?" API, so infer it from two
+; tests: no title bar, and covering the monitor's ENTIRE bounds.
+;
+; The second test is the load-bearing one. Windows reports two rectangles per
+; monitor:
+;
+;   work area      - the usable region, EXCLUDING the taskbar
+;   monitor bounds - the whole screen, INCLUDING the taskbar's strip
+;
+; A maximized window fills the work area and stops above the taskbar. A
+; fullscreen window covers the full bounds and paints over it. Comparing
+; against bounds is therefore what separates "maximized Chrome" from "game in
+; fullscreen"; comparing against the work area would fire on every maximized
+; window and hide the badges constantly.
+;
+; It also means borderless-windowed mode - what most modern games actually use
+; - is caught with no special handling, because borderless is a caption-less
+; popup sized exactly to monitor bounds and so satisfies both tests.
 IsFullscreenActive() {
     try {
         hwnd := WinExist("A")
         if !hwnd
             return false
         cls := WinGetClass(hwnd)
+        ; The desktop and shell would otherwise qualify as fullscreen.
         if (cls = "WorkerW" || cls = "Progman" || cls = "Shell_TrayWnd")
             return false
         style := WinGetStyle(hwnd)
         if (style & 0xC00000)          ; WS_CAPTION: an ordinary window
             return false
         WinGetPos(&wx, &wy, &ww, &wh, hwnd)
-        if (ww < 200 || wh < 200)
+        if (ww < 200 || wh < 200)      ; splash screens, tooltips, slivers
             return false
+        ; Resolve the monitor from the window's center, not the primary
+        ; display, so a fullscreen game on a second screen is detected.
         mi := MonitorIndexAt(wx + ww // 2, wy + wh // 2)
-        MonitorGet(mi, &ml, &mt, &mr, &mb)
+        MonitorGet(mi, &ml, &mt, &mr, &mb)      ; full bounds, not work area
         if (wx <= ml && wy <= mt && ww >= (mr - ml) && wh >= (mb - mt))
             return true
     }
