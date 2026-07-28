@@ -3,6 +3,23 @@
 All notable changes to this project are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.6.0] - 2026-07-27
+
+### Added
+- **Mute badge.** A fourth indicator for the Windows master mute state, with
+  the same independent controls as the lock keys. Defaults to red "MUTED" and
+  to **Stay visible until toggled off**, since the whole point is seeing that
+  mute is still on long after the volume flyout has gone.
+
+### Changed
+- Badge state is now read through a single `ReadLockState()` function. Caps,
+  Num and Scroll are keyboard toggle bits; Mute is a property of the Windows
+  audio endpoint via `SoundGetMute()`, which any app, the volume flyout or a
+  media key can change. The poll loop no longer needs to know which is which.
+- Tab captions shortened and the strip widened so six tabs stay on one row.
+- **Flash time** is disabled while Behavior is set to stay visible, because
+  nothing reads it in that mode.
+
 ## [1.5.2] - 2026-07-27
 
 ### Changed
@@ -104,6 +121,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 - Optional vertical or horizontal stacking
 - Autostart toggle and INI persistence
 
+[1.6.0]: ../../releases/tag/v1.6.0
 [1.5.2]: ../../releases/tag/v1.5.2
 [1.5.0]: ../../releases/tag/v1.5.0
 [1.4.0]: ../../releases/tag/v1.4.0

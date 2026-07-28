@@ -50,7 +50,7 @@ Persistent
 A_AllowMainWindow := false
 
 APP_NAME := "LockBadges"
-APP_VER := "v1.5.2"
+APP_VER := "v1.6.0"
 APP_AUTHOR := "Carl Lochstampfor"
 APP_REPO := "github.com/CLochstampfor60/LockBadges"
 APP_LICENSE := "MIT License"
@@ -67,9 +67,10 @@ if (!FileExist(IniFile) && FileExist(OldIni))
 LinkPath := A_Startup "\LockBadges.lnk"
 OldLink := A_Startup "\CapsBadge.lnk"
 
-Keys := ["Caps", "Num", "Scroll"]
+Keys := ["Caps", "Num", "Scroll", "Mute"]
 KeyVK := Map("Caps", "CapsLock", "Num", "NumLock", "Scroll", "ScrollLock")
-KeyNice := Map("Caps", "Caps Lock", "Num", "Num Lock", "Scroll", "Scroll Lock")
+KeyNice := Map("Caps", "Caps Lock", "Num", "Num Lock", "Scroll", "Scroll Lock"
+             , "Mute", "Mute")
 
 Ctl := Map()          ; settings controls, nested per key
 SG := ""              ; settings Gui
@@ -87,7 +88,7 @@ Suppressed := false
 FollowMon := 0
 
 ; Preview panel geometry
-PVX := 373
+PVX := 397
 PVY_ON := 86
 PVY_OFF := 204
 CANVAS_W := 300
@@ -146,7 +147,7 @@ A_IconTip := APP_NAME " " APP_VER
 OnMessage(0x201, OnLButtonDown)
 
 for k in Keys
-    St[k]["last"] := GetKeyState(KeyVK[k], "T") ? 1 : 0
+    St[k]["last"] := ReadLockState(k)
 for k in Keys {
     if (Cfg[k]["enabled"] && St[k]["last"] && Cfg[k]["mode"] = "persistent")
         ShowBadge(k, 1)
@@ -188,6 +189,11 @@ DefaultsFor(k) {
         d["labelOn"] := "NUM ON"
         d["labelOff"] := "num off"
         d["fgOn"] := "4BD4A0"
+    } else if (k = "Mute") {
+        d["labelOn"] := "MUTED"
+        d["labelOff"] := "sound on"
+        d["fgOn"] := "FF5B5B"
+        d["mode"] := "persistent"    ; a mute state you cannot see is the point
     } else if (k = "Scroll") {
         d["labelOn"] := "SCROLL ON"
         d["labelOff"] := "scroll off"
@@ -257,6 +263,21 @@ KeyIndex(k) {
             return i
     }
     return 1
+}
+
+; Not every badge reads a keyboard toggle. Caps, Num and Scroll are keyboard
+; toggle bits; Mute is a property of the Windows audio endpoint, which the
+; volume keys, the flyout, and any app can change. One reader keeps the poll
+; loop from caring which is which.
+ReadLockState(k) {
+    global KeyVK
+    if (k = "Mute") {
+        try
+            return SoundGetMute() ? 1 : 0
+        catch
+            return 0            ; no audio endpoint available
+    }
+    return GetKeyState(KeyVK[k], "T") ? 1 : 0
 }
 
 ; --- guards, because live preview reads half-typed values -------------
@@ -656,14 +677,14 @@ Poll() {
         if (wantSuppress && !Suppressed) {
             Suppressed := true
             for k in Keys {
-                St[k]["last"] := GetKeyState(KeyVK[k], "T") ? 1 : 0
+                St[k]["last"] := ReadLockState(k)
                 if St[k]["shown"]
                     HideNow(k)
             }
         } else if (!wantSuppress && Suppressed) {
             Suppressed := false
             for k in Keys {
-                St[k]["last"] := GetKeyState(KeyVK[k], "T") ? 1 : 0
+                St[k]["last"] := ReadLockState(k)
                 if (Cfg[k]["enabled"] && St[k]["last"]
                     && Cfg[k]["mode"] = "persistent")
                     ShowBadge(k, 1)
@@ -676,7 +697,7 @@ Poll() {
         ; only channel left while badges are hidden, which is precisely when
         ; it matters most - full-screen games.
         for k in Keys {
-            on := GetKeyState(KeyVK[k], "T") ? 1 : 0
+            on := ReadLockState(k)
             if (on = St[k]["last"])
                 continue
             St[k]["last"] := on
@@ -707,7 +728,7 @@ Poll() {
                 HideNow(k)
             continue
         }
-        on := GetKeyState(KeyVK[k], "T") ? 1 : 0
+        on := ReadLockState(k)
 
         if (on = St[k]["last"])
             continue
@@ -891,8 +912,11 @@ ShowSettings() {
     ; and silently shifts every page's content up behind it, clipping the
     ; first control. With -Wrap an overflow shows scroll arrows instead and
     ; the page geometry stays put.
-    Ctl["tab"] := SG.Add("Tab3", "x10 y10 w340 h646 -Wrap"
-        , ["Caps Lock", "Num Lock", "Scroll Lock", "General", "About"])
+    ; Captions shortened and the strip widened so six tabs stay on one row.
+    ; -Wrap forbids a second row: a wrapped strip is two rows tall and shifts
+    ; every page's content up behind it, clipping the first control.
+    Ctl["tab"] := SG.Add("Tab3", "x10 y10 w364 h646 -Wrap"
+        , ["Caps", "Num", "Scroll", "Mute", "General", "About"])
     Ctl["tab"].OnEvent("Change", TabChanged)
 
     for i, k in Keys {
@@ -901,7 +925,7 @@ ShowSettings() {
     }
 
     ; ---------------- General tab ----------------
-    Ctl["tab"].UseTab(4)
+    Ctl["tab"].UseTab(5)
     SG.Add("Text", "x24 y48 w110", "Preview backdrop")
     Ctl["backdrop"] := SG.Add("DropDownList", "x140 yp-3 w180", BackdropNames)
     Ctl["backdrop"].Text := Gcfg["backdrop"]
@@ -925,7 +949,7 @@ ShowSettings() {
     SG.Add("Text", "x24 y+14 w110", "Anchor badge")
     Ctl["anchor"] := SG.Add("DropDownList", "x140 yp-3 w180 Choose"
         . KeyIndex(AnchorKey())
-        , ["Caps Lock", "Num Lock", "Scroll Lock"])
+        , ["Caps Lock", "Num Lock", "Scroll Lock", "Mute"])
     Ctl["anchor"].OnEvent("Change", Touch)
 
     SG.Add("Text", "x24 y+14 w110", "Gap between (px)")
@@ -967,7 +991,7 @@ ShowSettings() {
         . "shortcut points at the old path.")
 
     ; ---------------- About tab ----------------
-    Ctl["tab"].UseTab(5)
+    Ctl["tab"].UseTab(6)
     SG.SetFont("s11 Bold")
     SG.Add("Text", "x24 y48 w300", APP_NAME)
     SG.SetFont("s9 norm")
@@ -1005,15 +1029,15 @@ ShowSettings() {
     b5.OnEvent("Click", (*) => DoSave())
     b6 := SG.Add("Button", "x242 y666 w108 h26", "Close")
     b6.OnEvent("Click", (*) => CloseSettings())
-    b7 := SG.Add("Button", "x360 y666 w118 h26", "Test all badges")
+    b7 := SG.Add("Button", "x384 y666 w118 h26", "Test all badges")
     b7.OnEvent("Click", (*) => TestAllFlash())
-    Ctl["status"] := SG.Add("Text", "x486 y672 w200 cGray", "")
+    Ctl["status"] := SG.Add("Text", "x510 y672 w200 cGray", "")
 
     ; ---------------- right column: live preview ----------------
-    SG.Add("GroupBox", "x360 y10 w330 h400", "Preview")
+    SG.Add("GroupBox", "x384 y10 w330 h400", "Preview")
     Ctl["pvWhich"] := SG.Add("Text", "x" PVX " y34 w300", "")
     SG.Add("Text", "x" PVX " y60 w80", "Shown over")
-    Ctl["pvBack"] := SG.Add("Text", "x457 y60 w220 cGray", "")
+    Ctl["pvBack"] := SG.Add("Text", "x481 y60 w220 cGray", "")
 
     ; Backdrop panels first, so badge swatches paint on top of them.
     Ctl["canvasOn"] := SG.Add("Text", "x" PVX " y" PVY_ON
@@ -1248,6 +1272,8 @@ UpdatePositionControls() {
         for kk in ["x", "y", "drag", "reset"] {
             try Ctl[k][kk].Enabled := free
         }
+        ; Flash time is read only in flash mode; persistent has no timer.
+        try Ctl[k]["duration"].Enabled := (Ctl[k]["mode"].Value != 2)
     }
 }
 
@@ -1460,7 +1486,7 @@ CloseSettings(force := false) {
     SG := ""
     Ctl := Map()
     for k in Keys {
-        St[k]["last"] := GetKeyState(KeyVK[k], "T") ? 1 : 0
+        St[k]["last"] := ReadLockState(k)
         if (Cfg[k]["enabled"] && St[k]["last"] && Cfg[k]["mode"] = "persistent")
             ShowBadge(k, 1)
     }

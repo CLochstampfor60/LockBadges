@@ -1,6 +1,6 @@
 # LockBadges
 
-**On-screen lock key indicators for keyboards that don't have them.** Caps Lock, Num Lock and Scroll Lock each get an independent, movable, translucent badge that you place wherever you actually look.
+**On-screen state indicators for keyboards that don't have them.** Caps Lock, Num Lock, Scroll Lock and Mute each get an independent, movable, translucent badge that you place wherever you actually look.
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D6)
@@ -54,7 +54,8 @@ Closed-source freeware in the same category: TrayStatus, Keyboard LEDs, Keyboard
 - Opacity slider, with an optional **"no box" mode** that removes the background entirely and floats only the text
 
 **Behavior**
-- **Flash briefly on change** or **stay visible until toggled off**, per lock
+- **Flash briefly on change** or **stay visible until toggled off**, per badge. In stay-visible mode there is no timer at all: the badge sits there until the state changes back.
+- **Mute badge** for the Windows master mute state, defaulting to stay-visible — the volume flyout tells you mute changed, then vanishes; this tells you it is *still on*.
 - Configurable flash duration and separate text/color for the ON and OFF states
 - Optional sound cues per lock, separately for ON and OFF — a Windows system
   sound or your own WAV. Plays asynchronously and honors your sound scheme and
@@ -202,7 +203,7 @@ screenshots won't show the app either.
 
 | Tab | What it controls |
 |---|---|
-| **Caps Lock** / **Num Lock** / **Scroll Lock** | Everything about that one badge: enable, ON/OFF text, font, size, position, colors, opacity, flash duration, behavior mode |
+| **Caps** / **Num** / **Scroll** / **Mute** | Everything about that one badge: enable, ON/OFF text, font, size, position, colors, opacity, flash duration, behavior mode |
 | **General** | Preview backdrop, stacking mode and anchor, gap, monitor follow, fullscreen hiding, screen-capture exclusion, autostart |
 | **About** | Version, author, license, privacy summary, config folder shortcut |
 
@@ -283,6 +284,8 @@ It also means borderless-windowed mode, which most modern games actually use, is
 Worth noting that `ResetPosition` makes the **opposite** choice deliberately, using the work area so a reset never parks a badge behind the taskbar. Two calls, two different rectangles, two different requirements — neither is a bug, and both are commented in the source to say so.
 
 **Click-through by default.** Badge windows carry `WS_EX_TRANSPARENT`, so mouse events pass through to whatever is underneath. An overlay that can steal a click is worse than no overlay. It's temporarily disabled only during "Drag to place".
+
+**Mute is not a keyboard toggle.** Caps, Num and Scroll are toggle bits Windows keeps for the keyboard. Mute is a property of the audio endpoint, read with `SoundGetMute()`, and it can be changed by a media key, the volume flyout, or any application. Both are read through one `ReadLockState()` function so the poll loop stays uniform, but the difference is real: the Mute badge will react to something else muting your audio, which the lock badges never do.
 
 **Polling, not hooking.** A 100ms timer reading a toggle bit is simpler, cheaper and safer than a keyboard hook, and it's the reason the privacy claim above holds.
 
