@@ -1,4 +1,4 @@
-#Requires AutoHotkey v2.0
+﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 Persistent
 
@@ -50,7 +50,7 @@ Persistent
 A_AllowMainWindow := false
 
 APP_NAME := "LockBadges"
-APP_VER := "v1.6.0"
+APP_VER := "v1.6.1"
 APP_AUTHOR := "Carl Lochstampfor"
 APP_REPO := "github.com/CLochstampfor60/LockBadges"
 APP_LICENSE := "MIT License"
@@ -707,6 +707,13 @@ Poll() {
         return
     }
 
+    ; --- watchdog: keep persistent badges alive ---
+    ; This loop only reacts to state CHANGES, so a badge meant to sit there
+    ; indefinitely has nothing re-checking it. A screensaver, display sleep,
+    ; a session lock or a shell window rising above ours can hide or bury it.
+    if (Mod(PollTick, 10) = 0)
+        WatchPersistent()
+
     ; --- follow the focused monitor ---
     if (Gcfg["follow"] && Mod(PollTick, 5) = 0) {
         mi := ActiveMonitorIndex()
@@ -744,8 +751,30 @@ Poll() {
     }
 }
 
-TestAll() {
-    global Keys, Cfg
+WatchPersistent() {
+    global Cfg, Keys, St, PollTick
+    for k in Keys {
+        if (!Cfg[k]["enabled"] || Cfg[k]["mode"] != "persistent")
+            continue
+        if (!St[k]["last"])
+            continue
+        if (!IsObject(St[k]["gui"])) {
+            ShowBadge(k, 1)
+            continue
+        }
+        visible := false
+        try visible := DllCall("IsWindowVisible", "ptr", St[k]["gui"].Hwnd)
+        if (!visible) {
+            ShowBadge(k, 1)
+            continue
+        }
+        ; Taskbar and shell are topmost too; re-assert so they cannot bury it.
+        if (Mod(PollTick, 20) = 0)
+            try WinSetAlwaysOnTop(1, St[k]["gui"])
+    }
+}
+
+TestAll() {    global Keys, Cfg
     for k in Keys {
         if Cfg[k]["enabled"]
             ShowBadge(k, 1)
