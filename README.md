@@ -1,6 +1,6 @@
 # LockBadges
 
-**On-screen state indicators for keyboards without lights.** Caps Lock, Num Lock, Scroll Lock and Mute each get an independent, movable, translucent badge that you place wherever you actually look — and that stays there for as long as the state is on.
+**On-screen state indicators for keyboards that don't have them.** Caps Lock, Num Lock, Scroll Lock and Mute each get an independent, movable, translucent badge that you place wherever you actually look.
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D6)
@@ -12,6 +12,18 @@
 
 ---
 
+## Contents
+
+[Why this exists](#why-this-exists) ·
+[Features](#features) ·
+[Install](#install) ·
+[Screenshots](#screenshots) ·
+[Settings](#settings-reference) ·
+[Troubleshooting](#troubleshooting) ·
+[Security](#security-and-privacy) ·
+[Design notes](#design-notes) ·
+[Alternatives](#alternatives-and-prior-art)
+
 ## Why this exists
 
 My keyboard has no caps lock light. The existing utilities I tried each got something wrong:
@@ -21,31 +33,6 @@ My keyboard has no caps lock light. The existing utilities I tried each got some
 - Logitech's Options+ notification looked good but was **fixed to the middle of the display** and **fully opaque**, so it covered content briefly every time it appeared.
 
 The requirement was narrow and none of them met it: something visible in **peripheral vision**, positioned where *I* choose, **see-through** so it never hides what's underneath, and configurable without editing a file.
-
-Mute got added later for the same reason in a different form. Windows *does* tell you when mute changes — the volume flyout appears, then disappears a second later. That answers "did it change?" but not "is it still on?", which is the question you actually have four minutes into a call when nobody is responding. Same class of problem: a state that matters, with no persistent indicator.
-
-## Alternatives and prior art
-
-I looked for existing tools before writing this. Credit where it's due:
-
-| Project | License | Approach |
-|---|---|---|
-| [CapsLockIndicator](https://github.com/jonaskohl/CapsLockIndicator) | Apache-2.0 | The most mature option by a wide margin. Overlay on state change with configurable display time, opacity, font, border thickness, and separate activated/deactivated colors for background, text and border. Optional persistent overlay per lock. Position is chosen from a nine-cell grid. |
-| [LogiLockLED](https://github.com/infra223/LogiLockLED) | Open source | Tray icons plus on-screen popups, and — its real differentiator — physical key backlight control through Logitech G Hub or OpenRGB. |
-| [KeyzPal](https://github.com/limbo666/KeyzPal) | Open source | Tray icon indicators with four icon themes. No on-screen display. |
-
-Closed-source freeware in the same category: TrayStatus, Keyboard LEDs, Keyboard Notifier, addLEDs, 7Caps.
-
-**Why this one exists anyway.** The overlap with CapsLockIndicator is real — it also has opacity and a font picker, so "translucent overlay" alone isn't the gap. What LockBadges does differently:
-
-- **Free pixel placement.** Nine grid cells cover corners, edges and center. They cannot put a badge in a specific empty spot on the taskbar, which is where I wanted mine. Drag it anywhere, or type exact coordinates.
-- **Per-badge independence.** Each badge has its own colors, font, size, position, opacity, duration and behavior mode — not one shared appearance applied to all of them.
-- **Mute is included.** Every tool listed above covers lock keys only. None of them indicate whether your audio is muted, which is arguably the state most worth knowing and the one Windows shows you for the shortest time.
-- **No-box mode.** The background can be keyed out entirely, leaving only floating text, so nothing is ever hidden.
-- **Environment awareness.** Auto-hide during fullscreen apps, follow the focused monitor, exclude from screen capture.
-- **Composited preview.** Colors are previewed as the true blended result at your opacity over a chosen backdrop, because opacity that works over a white page often fails over a dark IDE.
-
-**Where CapsLockIndicator is still ahead:** borders, localization, years of bug fixes across many machines, and a packaged installer. If you want a solid indicator and don't care exactly where it sits, use it — it's good software. This project exists because I cared exactly where it sits.
 
 ## Features
 
@@ -58,18 +45,13 @@ Closed-source freeware in the same category: TrayStatus, Keyboard LEDs, Keyboard
 
 **Behavior**
 - **Flash briefly on change** or **stay visible until toggled off**, per badge. In stay-visible mode there is no timer at all: the badge sits there until the state changes back.
+- **Mute badge** for the Windows master mute state, defaulting to stay-visible — the volume flyout tells you mute changed, then vanishes; this tells you it is *still on*.
 - Configurable flash duration and separate text/color for the ON and OFF states
 - Optional sound cues per lock, separately for ON and OFF — a Windows system
   sound or your own WAV. Plays asynchronously and honors your sound scheme and
   mute state, so silencing Windows silences this too.
 - Optional stacking (vertical or horizontal) from a configurable anchor badge, for when two locks are lit at once
 - Click-through at all times — the badge can never intercept a click
-
-**The Mute badge**
-- Tracks the **Windows master mute state**, not a keyboard toggle. Read from the audio endpoint, so it reflects whatever your system is actually doing.
-- Defaults to **stay visible until toggled off** and to red `MUTED`, because a mute state you can't see is the entire problem it solves.
-- Reacts to mute from **any source** — a media key, the volume flyout, Teams, or any application. The lock badges only ever change when you press their key; this one doesn't care who muted you.
-- Otherwise identical to the others: its own text, font, size, position, colors, opacity, sound cue and behavior mode, all independent.
 
 **Environment awareness**
 - Hides automatically while a fullscreen app is active (games, video, slideshows), while still tracking state so nothing flashes at you on the way out
@@ -81,9 +63,25 @@ Closed-source freeware in the same category: TrayStatus, Keyboard LEDs, Keyboard
 - The settings window previews colors as the **true alpha-composited result** at your chosen opacity, over a selectable backdrop (light page, dark editor, mid gray)
 - Every enabled badge stays on your desktop while settings are open, so you can position one against the others
 
+## Install
+
+**Requires Windows 10/11 and [AutoHotkey v2.0+](https://www.autohotkey.com/)** — v2 specifically; v1.1 will refuse to run this script.
+
+1. Install AutoHotkey v2 from [autohotkey.com](https://www.autohotkey.com/).
+2. Download `LockBadges.ahk` from [Releases](../../releases). Cloning the repo also works, but it pulls the docs and screenshots you don't need to run it.
+3. Put it somewhere permanent. **`C:\Program Files\LockBadges\` is recommended.** Avoid your Desktop, Downloads, or any OneDrive-synced folder: this script runs at every login, so it should live where your ordinary user account cannot rewrite it, and a synced or cleared-out folder will silently break the autostart shortcut. See [Security](#security-and-privacy).
+4. Double-click it. A green **H** appears in your tray — that's the AutoHotkey interpreter running the script.
+
+   <img src="assets/icon_tray_location.png" width="290" alt="Green H tray icon">
+
+5. Left-click the tray icon (or press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>) to open Settings.
+6. On the **General** tab, tick **Start automatically with Windows**, then **Save**.
+
+> Autostart writes a shortcut to your Startup folder pointing at the script's **current** path. If you move or rename the file afterwards, untick and re-tick the box to repoint it.
+
 ## Screenshots
 
-<details open>
+<details>
 <summary><b>Caps Lock tab</b> — every lock gets its own full control set</summary>
 
 <img src="assets/caps_tab_image1.png" width="820" alt="Caps Lock tab">
@@ -188,25 +186,6 @@ different tab in each — but the taskbar strip at the bottom is the point.)
 This is why the option defaults to off: leave it on and your own documentation
 screenshots won't show the app either.
 
-## Requirements
-
-- Windows 10 or 11
-- [AutoHotkey v2.0+](https://www.autohotkey.com/) — **v2 specifically**; v1.1 will refuse to run this script
-
-## Install
-
-1. Install AutoHotkey v2 from [autohotkey.com](https://www.autohotkey.com/).
-2. Download `LockBadges.ahk` from [Releases](../../releases) or clone this repo.
-3. Put it somewhere permanent. **`C:\Program Files\LockBadges\` is recommended** — see [Security](#security-and-privacy) for why the location matters.
-4. Double-click it. A green **H** appears in your tray — that's the AutoHotkey interpreter running the script.
-
-   <img src="assets/icon_tray_location.png" width="290" alt="Green H tray icon">
-
-5. Left-click the tray icon (or press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>) to open Settings.
-6. On the **General** tab, tick **Start automatically with Windows**, then **Save**.
-
-> Autostart writes a shortcut to your Startup folder pointing at the script's **current** path. If you move or rename the file afterwards, untick and re-tick the box to repoint it.
-
 ## Settings reference
 
 | Tab | What it controls |
@@ -234,6 +213,22 @@ Settings live in `%APPDATA%\LockBadges\config.ini`, one section per lock plus `[
 The program folder is never written to. That separation is intentional: it lets you install to a read-only location.
 
 Autostart is the one setting *not* stored in the INI — it's derived from whether `LockBadges.lnk` exists in your Startup folder, so the checkbox always reflects reality rather than a stale saved value.
+
+## Troubleshooting
+
+**Windows asks which app to open the .ahk with** — AutoHotkey isn't installed. Install v2; it registers the file association.
+
+**"This script requires AutoHotkey v2"** — you have v1.1. They install side by side; get v2.
+
+**Badge doesn't appear after a reboot** — check `shell:startup` for `LockBadges.lnk`, and confirm it points at the file's current path. Re-tick autostart in Settings if you moved the script.
+
+**Two badges of the same lock** — two copies of the script are running. Exit from the tray and check for stray copies elsewhere.
+
+**Badge is off-screen** — the position is saved in the INI. Use **Reset pos** on that lock's tab, or edit `x`/`y` in `config.ini`.
+
+**Reset pos moves it off my taskbar** — expected. It uses the monitor *work area*, which excludes the taskbar. Use Drag to place instead.
+
+**Badge missing from my screenshots** — "Exclude badges from screen capture" is on. Turn it off while documenting. See [Capture exclusion, demonstrated](#capture-exclusion-demonstrated).
 
 ## Security and privacy
 
@@ -299,25 +294,27 @@ Worth noting that `ResetPosition` makes the **opposite** choice deliberately, us
 
 **Preview honesty.** A child control can't be genuinely translucent, so the preview alpha-composites the badge colors against the selected backdrop using the same maths Windows applies to a layered window. The colors shown are the real result, not an approximation.
 
-## Troubleshooting
+## Alternatives and prior art
 
-**Windows asks which app to open the .ahk with** — AutoHotkey isn't installed. Install v2; it registers the file association.
+I looked for existing tools before writing this. Credit where it's due:
 
-**"This script requires AutoHotkey v2"** — you have v1.1. They install side by side; get v2.
+| Project | License | Approach |
+|---|---|---|
+| [CapsLockIndicator](https://github.com/jonaskohl/CapsLockIndicator) | Apache-2.0 | The most mature option by a wide margin. Overlay on state change with configurable display time, opacity, font, border thickness, and separate activated/deactivated colors for background, text and border. Optional persistent overlay per lock. Position is chosen from a nine-cell grid. |
+| [LogiLockLED](https://github.com/infra223/LogiLockLED) | Open source | Tray icons plus on-screen popups, and — its real differentiator — physical key backlight control through Logitech G Hub or OpenRGB. |
+| [KeyzPal](https://github.com/limbo666/KeyzPal) | Open source | Tray icon indicators with four icon themes. No on-screen display. |
 
-**Badge doesn't appear after a reboot** — check `shell:startup` for `LockBadges.lnk`, and confirm it points at the file's current path. Re-tick autostart in Settings if you moved the script.
+Closed-source freeware in the same category: TrayStatus, Keyboard LEDs, Keyboard Notifier, addLEDs, 7Caps.
 
-**Two badges of the same lock** — two copies of the script are running. Exit from the tray and check for stray copies elsewhere.
+**Why this one exists anyway.** The overlap with CapsLockIndicator is real — it also has opacity and a font picker, so "translucent overlay" alone isn't the gap. What LockBadges does differently:
 
-**Mute badge never appears** — press your mute key and watch for the Windows volume flyout. If the flyout doesn't appear, your keyboard or headset is muting at the hardware level without telling Windows, and there is no state for any software to read. If the flyout *does* appear but the badge doesn't, check that Mute is enabled on its own tab.
+- **Free pixel placement.** Nine grid cells cover corners, edges and center. They cannot put a badge in a specific empty spot on the taskbar, which is where I wanted mine. Drag it anywhere, or type exact coordinates.
+- **Per-lock independence.** Each lock has its own colors, font, size, position, opacity, duration and behavior mode — not one shared appearance applied to all three.
+- **No-box mode.** The background can be keyed out entirely, leaving only floating text, so nothing is ever hidden.
+- **Environment awareness.** Auto-hide during fullscreen apps, follow the focused monitor, exclude from screen capture.
+- **Composited preview.** Colors are previewed as the true blended result at your opacity over a chosen backdrop, because opacity that works over a white page often fails over a dark IDE.
 
-**Mute badge fires when I didn't touch the keyboard** — expected. It reflects the system mute state, which Teams, Discord, media keys and other apps can all change.
-
-**Badge is off-screen** — the position is saved in the INI. Use **Reset pos** on that lock's tab, or edit `x`/`y` in `config.ini`.
-
-**Reset pos moves it off my taskbar** — expected. It uses the monitor *work area*, which excludes the taskbar. Use Drag to place instead.
-
-**Badge missing from my screenshots** — "Exclude badges from screen capture" is on. Turn it off while documenting. See [Capture exclusion, demonstrated](#capture-exclusion-demonstrated).
+**Where CapsLockIndicator is still ahead:** borders, localisation, years of bug fixes across many machines, and a packaged installer. If you want a solid indicator and don't care exactly where it sits, use it — it's good software. This project exists because I cared exactly where it sits.
 
 ## Uninstall
 
@@ -335,14 +332,17 @@ No registry keys, no services, no other files.
 
 ## Contributing
 
-This is a personal portfolio project and I'm not accepting pull requests. Bug reports via Issues are welcome. Forking is encouraged — MIT means you can do what you like with it.
+This is a personal portfolio project and I'm not accepting pull requests. Bug reports via Issues are welcome. Forking is encouraged — MIT lets you do essentially what you like with it, provided the copyright notice travels with the code.
 
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+MIT is permissive: you may use, modify, distribute and sell this software, including as part of a commercial product. It imposes one obligation, and it is not optional — **the copyright notice and permission notice must be included in all copies or substantial portions of the software.** Ship it, fork it, build on it, but the attribution stays.
 
 AutoHotkey itself is licensed under the GPL. This repository distributes only the `.ahk` source, which is my own work under MIT, and does not bundle any AutoHotkey binary. If you compile it and redistribute the resulting `.exe`, the compiled artifact contains the AutoHotkey interpreter and the licensing picture becomes genuinely contested — AutoHotkey's original author stated that compiled scripts may be sold commercially, while others argue GPL obligations attach to the interpreter portion. Do your own research before distributing binaries.
 
 ## Author
 
 **Carl Lochstampfor** — [@CLochstampfor60](https://github.com/CLochstampfor60)
+
