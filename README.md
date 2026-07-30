@@ -1,6 +1,6 @@
 # LockBadges
 
-**On-screen state indicators for keyboards that don't have them.** Caps Lock, Num Lock, Scroll Lock and Mute each get an independent, movable, translucent badge that you place wherever you actually look.
+**On-screen state indicators for keyboards without lights.** Caps Lock, Num Lock, Scroll Lock and Mute each get an independent, movable, translucent badge that you place wherever you actually look — and that stays there for as long as the state is on.
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D6)
@@ -22,6 +22,8 @@ My keyboard has no caps lock light. The existing utilities I tried each got some
 
 The requirement was narrow and none of them met it: something visible in **peripheral vision**, positioned where *I* choose, **see-through** so it never hides what's underneath, and configurable without editing a file.
 
+Mute got added later for the same reason in a different form. Windows *does* tell you when mute changes — the volume flyout appears, then disappears a second later. That answers "did it change?" but not "is it still on?", which is the question you actually have four minutes into a call when nobody is responding. Same class of problem: a state that matters, with no persistent indicator.
+
 ## Alternatives and prior art
 
 I looked for existing tools before writing this. Credit where it's due:
@@ -37,12 +39,13 @@ Closed-source freeware in the same category: TrayStatus, Keyboard LEDs, Keyboard
 **Why this one exists anyway.** The overlap with CapsLockIndicator is real — it also has opacity and a font picker, so "translucent overlay" alone isn't the gap. What LockBadges does differently:
 
 - **Free pixel placement.** Nine grid cells cover corners, edges and center. They cannot put a badge in a specific empty spot on the taskbar, which is where I wanted mine. Drag it anywhere, or type exact coordinates.
-- **Per-lock independence.** Each lock has its own colors, font, size, position, opacity, duration and behavior mode — not one shared appearance applied to all three.
+- **Per-badge independence.** Each badge has its own colors, font, size, position, opacity, duration and behavior mode — not one shared appearance applied to all of them.
+- **Mute is included.** Every tool listed above covers lock keys only. None of them indicate whether your audio is muted, which is arguably the state most worth knowing and the one Windows shows you for the shortest time.
 - **No-box mode.** The background can be keyed out entirely, leaving only floating text, so nothing is ever hidden.
 - **Environment awareness.** Auto-hide during fullscreen apps, follow the focused monitor, exclude from screen capture.
 - **Composited preview.** Colors are previewed as the true blended result at your opacity over a chosen backdrop, because opacity that works over a white page often fails over a dark IDE.
 
-**Where CapsLockIndicator is still ahead:** borders, localisation, years of bug fixes across many machines, and a packaged installer. If you want a solid indicator and don't care exactly where it sits, use it — it's good software. This project exists because I cared exactly where it sits.
+**Where CapsLockIndicator is still ahead:** borders, localization, years of bug fixes across many machines, and a packaged installer. If you want a solid indicator and don't care exactly where it sits, use it — it's good software. This project exists because I cared exactly where it sits.
 
 ## Features
 
@@ -55,13 +58,18 @@ Closed-source freeware in the same category: TrayStatus, Keyboard LEDs, Keyboard
 
 **Behavior**
 - **Flash briefly on change** or **stay visible until toggled off**, per badge. In stay-visible mode there is no timer at all: the badge sits there until the state changes back.
-- **Mute badge** for the Windows master mute state, defaulting to stay-visible — the volume flyout tells you mute changed, then vanishes; this tells you it is *still on*.
 - Configurable flash duration and separate text/color for the ON and OFF states
 - Optional sound cues per lock, separately for ON and OFF — a Windows system
   sound or your own WAV. Plays asynchronously and honors your sound scheme and
   mute state, so silencing Windows silences this too.
 - Optional stacking (vertical or horizontal) from a configurable anchor badge, for when two locks are lit at once
 - Click-through at all times — the badge can never intercept a click
+
+**The Mute badge**
+- Tracks the **Windows master mute state**, not a keyboard toggle. Read from the audio endpoint, so it reflects whatever your system is actually doing.
+- Defaults to **stay visible until toggled off** and to red `MUTED`, because a mute state you can't see is the entire problem it solves.
+- Reacts to mute from **any source** — a media key, the volume flyout, Teams, or any application. The lock badges only ever change when you press their key; this one doesn't care who muted you.
+- Otherwise identical to the others: its own text, font, size, position, colors, opacity, sound cue and behavior mode, all independent.
 
 **Environment awareness**
 - Hides automatically while a fullscreen app is active (games, video, slideshows), while still tracking state so nothing flashes at you on the way out
@@ -300,6 +308,10 @@ Worth noting that `ResetPosition` makes the **opposite** choice deliberately, us
 **Badge doesn't appear after a reboot** — check `shell:startup` for `LockBadges.lnk`, and confirm it points at the file's current path. Re-tick autostart in Settings if you moved the script.
 
 **Two badges of the same lock** — two copies of the script are running. Exit from the tray and check for stray copies elsewhere.
+
+**Mute badge never appears** — press your mute key and watch for the Windows volume flyout. If the flyout doesn't appear, your keyboard or headset is muting at the hardware level without telling Windows, and there is no state for any software to read. If the flyout *does* appear but the badge doesn't, check that Mute is enabled on its own tab.
+
+**Mute badge fires when I didn't touch the keyboard** — expected. It reflects the system mute state, which Teams, Discord, media keys and other apps can all change.
 
 **Badge is off-screen** — the position is saved in the INI. Use **Reset pos** on that lock's tab, or edit `x`/`y` in `config.ini`.
 
