@@ -50,7 +50,7 @@ Persistent
 A_AllowMainWindow := false
 
 APP_NAME := "LockBadges"
-APP_VER := "v1.6.1"
+APP_VER := "v1.6.2"
 APP_AUTHOR := "Carl Lochstampfor"
 APP_REPO := "github.com/CLochstampfor60/LockBadges"
 APP_LICENSE := "MIT License"
@@ -774,7 +774,8 @@ WatchPersistent() {
     }
 }
 
-TestAll() {    global Keys, Cfg
+TestAll() {
+    global Keys, Cfg
     for k in Keys {
         if Cfg[k]["enabled"]
             ShowBadge(k, 1)
